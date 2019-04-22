@@ -11,21 +11,36 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    datastaxVersion = '2.4.0'
+    sparkSqlVersion = '2.4.0'
+    sparkCoreVersion = '2.4.0'
+    sparkMlVersion = '2.4.0'
+    sparkStreamingVersion = '2.4.0'
+    scalaVersion = '2.11'
+    scalaLibraryVersion = scalaVersion + '.12'
+    lombokVersion = '1.18.2'
+}
+
 // jdk 11
 // spark 2.4.0
 // scala 2.11.12
 // datastax cassandra connector 2.4
 dependencies {
     // https://mvnrepository.com/artifact/org.scala-lang/scala-library
-    compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.12'
+    compile group: 'org.scala-lang', name: 'scala-library', version: scalaLibraryVersion
     // https://mvnrepository.com/artifact/org.apache.spark/spark-core
-    compile group: 'org.apache.spark', name: 'spark-core_2.11', version: '2.4.0'
+    compile group: 'org.apache.spark', name: 'spark-core_2.11', version: sparkCoreVersion
     // https://mvnrepository.com/artifact/org.apache.spark/spark-sql
-    compile group: 'org.apache.spark', name: 'spark-sql_2.11', version: '2.4.0'
+    compile group: 'org.apache.spark', name: 'spark-sql_2.11', version: sparkSqlVersion
     // https://mvnrepository.com/artifact/org.apache.spark/spark-mllib
-    compile group: 'org.apache.spark', name: 'spark-mllib_2.11', version: '2.4.0'
+    compile group: 'org.apache.spark', name: 'spark-mllib_2.11', version: sparkMlVersion
     // https://mvnrepository.com/artifact/org.apache.spark/spark-streaming
-    compile group: 'org.apache.spark', name: 'spark-streaming_2.11', version: '2.4.0'
+    compile group: 'org.apache.spark', name: 'spark-streaming_2.11', version: sparkStreamingVersion
+    // https://mvnrepository.com/artifact/com.datastax.spark/spark-cassandra-connector
+    compile("com.datastax.spark:spark-cassandra-connector_$scalaVersion:$datastaxVersion")
+    //
+    compile("org.projectlombok:lombok:$lombokVersion")
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

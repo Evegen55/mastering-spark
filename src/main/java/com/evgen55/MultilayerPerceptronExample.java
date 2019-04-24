@@ -34,7 +34,7 @@ public class MultilayerPerceptronExample {
                 .setLayers(layers)
                 .setBlockSize(3)
                 .setSeed(1234L)
-                .setMaxIter(10);
+                .setMaxIter(5);
 
         final MultilayerPerceptronClassificationModel model = trainer.fit(dataFrameTrain);
 

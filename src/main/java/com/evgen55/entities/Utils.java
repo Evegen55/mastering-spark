@@ -25,7 +25,7 @@ public class Utils {
         return labelsMapping.entrySet().stream()
                 .filter(stringIntegerEntry -> stringIntegerEntry.getValue() == labelNumber)
                 .findFirst()
-                .get()
+                .orElseThrow(RuntimeException::new)
                 .getKey();
     }
 }

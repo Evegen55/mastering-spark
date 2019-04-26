@@ -12,11 +12,11 @@ repositories {
 }
 
 ext {
-    datastaxVersion = '2.4.0'
-    sparkSqlVersion = '2.4.0'
-    sparkCoreVersion = '2.4.0'
-    sparkMlVersion = '2.4.0'
-    sparkStreamingVersion = '2.4.0'
+    datastaxVersion = '2.4.1'
+    sparkSqlVersion = '2.4.1'
+    sparkCoreVersion = '2.4.1'
+    sparkMlVersion = '2.4.1'
+    sparkStreamingVersion = '2.4.1'
     scalaVersion = '2.11'
     scalaLibraryVersion = scalaVersion + '.12'
     lombokVersion = '1.18.2'

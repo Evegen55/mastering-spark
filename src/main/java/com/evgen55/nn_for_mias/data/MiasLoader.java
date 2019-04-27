@@ -27,6 +27,7 @@ public class MiasLoader {
         try (final FileInputStream inImage = new FileInputStream(inputImagePath);
              final BufferedInputStream inImageStream = new BufferedInputStream(inImage)) {
             try {
+                System.out.println("Available " + inImageStream.available() + " bytes");
                 if (MAGIC.equals(nextString(inImageStream))) {
                     final int width = Integer.parseInt(nextString(inImageStream));
                     final int height = Integer.parseInt(nextString(inImageStream));
@@ -34,17 +35,23 @@ public class MiasLoader {
                     System.out.println("read image " + width + " x " + height + " with the maximum gray value " + maxGreyValue + ".");
 
                     final int[][] image = new int[width][height];
-                    for (int i = 0; i < width; ++i) {
-                        for (int j = 0; j < height; ++j) {
-                            final int p = inImageStream.read();
-                            if (p == -1)
-                                throw new IOException("Reached end-of-file prematurely.");
-                            else if (p > maxGreyValue)
-                                throw new IOException("Pixel value " + p + " outside of range [0, " + maxGreyValue + "].");
-                            image[i][j] = p;
+                    if (maxGreyValue <= 255) {
+                        System.out.println("Reading data represented as 1 byte, see http://netpbm.sourceforge.net/doc/pgm.html");
+                        for (int i = 0; i < width; ++i) {
+                            for (int j = 0; j < height; ++j) {
+                                final int p = inImageStream.read();
+                                if (p == -1)
+                                    throw new IOException("Reached end-of-file prematurely.");
+                                else if (p > maxGreyValue)
+                                    throw new IOException("Pixel value " + p + " outside of range [0, " + maxGreyValue + "].");
+                                image[i][j] = p;
+                            }
                         }
+                    } else {
+                        System.out.println("Read data represented as 2 bytes, see http://netpbm.sourceforge.net/doc/pgm.html");
+                        // TODO: 27.04.19
                     }
-
+                    System.out.println("Available " + inImageStream.available() + " bytes");
                 } else {
                     throw new IOException();
                 }

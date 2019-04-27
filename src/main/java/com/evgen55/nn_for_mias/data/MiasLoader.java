@@ -1,5 +1,14 @@
 package com.evgen55.nn_for_mias.data;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.LocatedFileStatus;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.RemoteIterator;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
+
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -8,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MiasLoader {
+
+    private static String PGM_SUFFIX = ".pgm";
 
     /**
      * Magic number representing the binary PGM file type.
@@ -18,12 +29,35 @@ public class MiasLoader {
      */
     private static final char COMMENT = '#';
 
+    private final SparkSession sparkSession;
+    private final Configuration hadoopConfiguration;
+    private final FileSystem fileSystem;
 
-    public static void readFromData() {
+    public MiasLoader(final SparkSession sparkSession) throws IOException {
+        hadoopConfiguration = sparkSession.sparkContext().hadoopConfiguration();
+        this.sparkSession = sparkSession;
+        fileSystem = FileSystem.get(hadoopConfiguration);
+    }
 
+    public Dataset<Row> readFromData(final String pathToMiasDataSet) throws IOException {
 
-        final String inputImagePath = "src/main/resources/dataset_mias/mdb001.pgm";
+        final List<LabeledMiasImage> labeledMiasImages = new ArrayList<>();
+        final Path hdfsPath = new Path(pathToMiasDataSet); //folder with mias images and descriptions
+        RemoteIterator<LocatedFileStatus> locatedFileStatusRemoteIterator = fileSystem.listFiles(hdfsPath, true);
+        while (locatedFileStatusRemoteIterator.hasNext()) {
+            final LocatedFileStatus locatedFileStatus = locatedFileStatusRemoteIterator.next();
+            final Path locatedFileStatusPath = locatedFileStatus.getPath();
+            final String locatedFileStatusName = locatedFileStatusPath.getName();
+            if (locatedFileStatusName.endsWith(PGM_SUFFIX)) {
+                labeledMiasImages.add(getLabeledMiasImage(locatedFileStatusPath.toUri().getPath()));
+            }
+        }
+        return sparkSession.createDataFrame(labeledMiasImages, LabeledMiasImage.class);
 
+    }
+
+    protected LabeledMiasImage getLabeledMiasImage(final String inputImagePath) {
+        LabeledMiasImage labeledMiasImage = null;
         try (final FileInputStream inImage = new FileInputStream(inputImagePath);
              final BufferedInputStream inImageStream = new BufferedInputStream(inImage)) {
             try {
@@ -38,7 +72,8 @@ public class MiasLoader {
                     if (maxGreyValue <= 255) {
                         System.out.println("Reading data represented as 1 byte, see http://netpbm.sourceforge.net/doc/pgm.html");
 //                        readAsTwoDimArray(inImageStream, width, height, maxGreyValue);
-                        readAsSingleDimArray(inImageStream, maxGreyValue, recurrentImageBufferSize);
+                        double[] singleDimArray = readAsSingleDimArray(inImageStream, maxGreyValue, recurrentImageBufferSize);
+                        return new LabeledMiasImage(singleDimArray, 0); // TODO: 27.04.19 Label from dataset
                     } else {
                         System.out.println("Read data represented as 2 bytes, see http://netpbm.sourceforge.net/doc/pgm.html");
                         // TODO: 27.04.19
@@ -53,6 +88,7 @@ public class MiasLoader {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return labeledMiasImage;
     }
 
     private static double[] readAsSingleDimArray(final BufferedInputStream inImageStream,

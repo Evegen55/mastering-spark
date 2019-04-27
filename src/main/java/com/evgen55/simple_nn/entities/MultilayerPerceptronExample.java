@@ -1,7 +1,7 @@
-package com.evgen55;
+package com.evgen55.simple_nn.entities;
 
-import com.evgen55.entities.LabeledBehaviour;
-import com.evgen55.entities.Utils;
+import com.evgen55.simple_nn.entities.LabeledBehaviour;
+import com.evgen55.simple_nn.entities.Utils;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.ml.classification.MultilayerPerceptronClassificationModel;

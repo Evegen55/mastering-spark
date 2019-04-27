@@ -1,4 +1,4 @@
-package com.evgen55.entities;
+package com.evgen55.simple_nn.entities;
 
 import java.util.HashMap;
 import java.util.Map;

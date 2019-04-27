@@ -34,10 +34,13 @@ public class MiasLoader {
                     final int maxGreyValue = Integer.parseInt(nextString(inImageStream));
                     System.out.println("read image " + width + " x " + height + " with the maximum gray value " + maxGreyValue + ".");
 
-                    final double[][] image = new double[width][height];
+//                    final double[][] image = new double[width][height];
+                    final int recurrentImageBufferSize = width * height;
+                    final double[] image = new double[recurrentImageBufferSize];
                     if (maxGreyValue <= 255) {
                         System.out.println("Reading data represented as 1 byte, see http://netpbm.sourceforge.net/doc/pgm.html");
-                        readAsTwoDimArray(inImageStream, width, height, maxGreyValue, image);
+//                        readAsTwoDimArray(inImageStream, width, height, maxGreyValue, image);
+                        readAsSingleDimArray(inImageStream, maxGreyValue, recurrentImageBufferSize, image);
                     } else {
                         System.out.println("Read data represented as 2 bytes, see http://netpbm.sourceforge.net/doc/pgm.html");
                         // TODO: 27.04.19
@@ -51,6 +54,19 @@ public class MiasLoader {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void readAsSingleDimArray(final BufferedInputStream inImageStream,
+                                             final int maxGreyValue, final int recurrentImageBufferSize,
+                                             final double[] image) throws IOException {
+        for (int i = 0; i < recurrentImageBufferSize; ++i) {
+            final int p = inImageStream.read();
+            if (p == -1)
+                throw new IOException("Reached end-of-file prematurely.");
+            else if (p > maxGreyValue)
+                throw new IOException("Pixel value " + p + " outside of range [0, " + maxGreyValue + "].");
+            image[i] = p;
         }
     }
 

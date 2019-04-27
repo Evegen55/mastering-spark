@@ -1,4 +1,4 @@
-package com.evgen55.simple_nn.entities;
+package com.evgen55.simple_nn;
 
 import com.evgen55.simple_nn.entities.LabeledBehaviour;
 import com.evgen55.simple_nn.entities.Utils;

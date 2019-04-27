@@ -34,13 +34,11 @@ public class MiasLoader {
                     final int maxGreyValue = Integer.parseInt(nextString(inImageStream));
                     System.out.println("read image " + width + " x " + height + " with the maximum gray value " + maxGreyValue + ".");
 
-//                    final double[][] image = new double[width][height];
                     final int recurrentImageBufferSize = width * height;
-                    final double[] image = new double[recurrentImageBufferSize];
                     if (maxGreyValue <= 255) {
                         System.out.println("Reading data represented as 1 byte, see http://netpbm.sourceforge.net/doc/pgm.html");
-//                        readAsTwoDimArray(inImageStream, width, height, maxGreyValue, image);
-                        readAsSingleDimArray(inImageStream, maxGreyValue, recurrentImageBufferSize, image);
+//                        readAsTwoDimArray(inImageStream, width, height, maxGreyValue);
+                        readAsSingleDimArray(inImageStream, maxGreyValue, recurrentImageBufferSize);
                     } else {
                         System.out.println("Read data represented as 2 bytes, see http://netpbm.sourceforge.net/doc/pgm.html");
                         // TODO: 27.04.19
@@ -57,9 +55,9 @@ public class MiasLoader {
         }
     }
 
-    private static void readAsSingleDimArray(final BufferedInputStream inImageStream,
-                                             final int maxGreyValue, final int recurrentImageBufferSize,
-                                             final double[] image) throws IOException {
+    private static double[] readAsSingleDimArray(final BufferedInputStream inImageStream,
+                                                 final int maxGreyValue, final int recurrentImageBufferSize) throws IOException {
+        final double[] image = new double[recurrentImageBufferSize];
         for (int i = 0; i < recurrentImageBufferSize; ++i) {
             final int p = inImageStream.read();
             if (p == -1)
@@ -68,11 +66,12 @@ public class MiasLoader {
                 throw new IOException("Pixel value " + p + " outside of range [0, " + maxGreyValue + "].");
             image[i] = p;
         }
+        return image;
     }
 
-    private static void readAsTwoDimArray(final BufferedInputStream inImageStream,
-                                          final int width, final int height, final int maxGreyValue,
-                                          final double[][] image) throws IOException {
+    private static double[][] readAsTwoDimArray(final BufferedInputStream inImageStream,
+                                                final int width, final int height, final int maxGreyValue) throws IOException {
+        final double[][] image = new double[width][height];
         for (int i = 0; i < width; ++i) {
             for (int j = 0; j < height; ++j) {
                 final int p = inImageStream.read();
@@ -83,6 +82,7 @@ public class MiasLoader {
                 image[i][j] = p;
             }
         }
+        return image;
     }
 
     private static String nextString(final InputStream stream) throws IOException {

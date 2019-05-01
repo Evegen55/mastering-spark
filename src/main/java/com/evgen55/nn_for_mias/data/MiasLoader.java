@@ -109,7 +109,7 @@ public class MiasLoader {
                 throw new IOException("Reached end-of-file prematurely.");
             else if (p > maxGreyValue)
                 throw new IOException("Pixel value " + p + " outside of range [0, " + maxGreyValue + "].");
-            image[i] = p;
+            image[i] = p; //upscale from 1 byte to 8 - CRAZY JAVA
         }
         return image;
     }

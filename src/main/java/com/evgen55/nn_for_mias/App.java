@@ -11,6 +11,7 @@ import org.apache.spark.sql.SparkSession;
 
 import java.io.IOException;
 
+//-Xmx16G
 public class App {
 
     public static void main(String[] args) throws IOException {

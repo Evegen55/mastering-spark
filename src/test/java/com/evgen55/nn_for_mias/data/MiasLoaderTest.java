@@ -21,18 +21,20 @@ public class MiasLoaderTest {
     }
 
     @Test
-    public void getLabeledMiasImage() throws IOException {
+    public void getLabeledMiasImage() throws IOException, InterruptedException {
         MiasLoader miasLoader = new MiasLoader(sparkSession);
         final String inputImagePath = "src/main/resources/dataset_mias/mdb001.pgm";
         miasLoader.getLabeledMiasImage(inputImagePath);
+        Thread.sleep(1000000);
     }
 
     @Test
     public void readFromData() throws IOException, InterruptedException {
         MiasLoader miasLoader = new MiasLoader(sparkSession);
-        String pathToMias = "/home/evgen/Development/1_Under_VCS/github/4_NN_ML/data_for_trainings/all-mias";
+        String pathToMias = "/home/evgen/Development/1_Under_VCS/github/4_NN_ML/data_for_trainings/3-mias";
         Dataset<Row> rowDataset = miasLoader.readFromData(pathToMias);
         rowDataset.show();
+        rowDataset.count();
         Thread.sleep(1000000);
     }
 }

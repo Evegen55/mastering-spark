@@ -5,6 +5,11 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocatedFileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RemoteIterator;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.input.PortableDataStream;
+import org.apache.spark.ml.feature.LabeledPoint;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -15,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MiasLoader {
 
@@ -30,18 +36,20 @@ public class MiasLoader {
     private static final char COMMENT = '#';
 
     private final SparkSession sparkSession;
+    private final JavaSparkContext javaSparkContext;
     private final Configuration hadoopConfiguration;
     private final FileSystem fileSystem;
 
     public MiasLoader(final SparkSession sparkSession) throws IOException {
-        hadoopConfiguration = sparkSession.sparkContext().hadoopConfiguration();
         this.sparkSession = sparkSession;
+        javaSparkContext = new JavaSparkContext(sparkSession.sparkContext());
+        hadoopConfiguration = sparkSession.sparkContext().hadoopConfiguration();
         fileSystem = FileSystem.get(hadoopConfiguration);
     }
 
     public Dataset<Row> readFromData(final String pathToMiasDataSet) throws IOException {
 
-        final List<LabeledMiasImage> labeledMiasImages = new ArrayList<>();
+        final List<LabeledMiasImage> labeledMiasImages = new ArrayList<>(); // TODO: 27.04.19 lazy download
         final Path hdfsPath = new Path(pathToMiasDataSet); //folder with mias images and descriptions
         RemoteIterator<LocatedFileStatus> locatedFileStatusRemoteIterator = fileSystem.listFiles(hdfsPath, true);
         while (locatedFileStatusRemoteIterator.hasNext()) {
@@ -156,4 +164,25 @@ public class MiasLoader {
         } while (d != -1 && d != '\n' && d != '\r');
         return skipPos;
     }
+
+    public void load(final String pathToMiasDataSet) {
+        final Path hdfsPath = new Path(pathToMiasDataSet); //folder with mias images and descriptions
+        final JavaPairRDD<String, PortableDataStream> binaryFiles = javaSparkContext.binaryFiles(hdfsPath.toUri().getPath());
+        JavaRDD<LabeledPoint> labeledPointJavaRDD = binaryFiles
+                .map(fileNameAndDataTuple -> {
+                    LabeledPoint labeledPointMiasImage = null;
+                    String pathToFile = fileNameAndDataTuple._1();
+                    final Path hdfsPathToFile = new Path(pathToFile);
+                    if (hdfsPathToFile.getName().endsWith(PGM_SUFFIX)) {
+                        System.out.println(pathToFile);
+                    }
+                    return labeledPointMiasImage;
+                })
+                .filter(Objects::nonNull);
+
+        labeledPointJavaRDD.count();
+
+    }
+
+
 }

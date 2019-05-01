@@ -10,6 +10,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.input.PortableDataStream;
 import org.apache.spark.ml.feature.LabeledPoint;
+import org.apache.spark.ml.linalg.Vectors;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -165,23 +166,49 @@ public class MiasLoader {
         return skipPos;
     }
 
-    public void load(final String pathToMiasDataSet) {
+    public Dataset<Row> load(final String pathToMiasDataSet) {
+        System.out.println("Creating data frame from MIAS images . . .");
+        JavaRDD<LabeledPoint> labeledPointJavaRDD = getLabeledPointJavaRDD(pathToMiasDataSet);
+        Dataset<Row> dataFrame = sparkSession.createDataFrame(labeledPointJavaRDD, LabeledPoint.class);
+        System.out.println("Creating data frame from MIAS images is done");
+        return dataFrame;
+    }
+
+    private JavaRDD<LabeledPoint> getLabeledPointJavaRDD(final String pathToMiasDataSet) {
         final Path hdfsPath = new Path(pathToMiasDataSet); //folder with mias images and descriptions
         final JavaPairRDD<String, PortableDataStream> binaryFiles = javaSparkContext.binaryFiles(hdfsPath.toUri().getPath());
-        JavaRDD<LabeledPoint> labeledPointJavaRDD = binaryFiles
+        return binaryFiles
                 .map(fileNameAndDataTuple -> {
                     LabeledPoint labeledPointMiasImage = null;
                     String pathToFile = fileNameAndDataTuple._1();
                     final Path hdfsPathToFile = new Path(pathToFile);
                     if (hdfsPathToFile.getName().endsWith(PGM_SUFFIX)) {
-                        System.out.println(pathToFile);
+                        try (final BufferedInputStream inImageStream = new BufferedInputStream(fileNameAndDataTuple._2().open())) {
+                            System.out.println("Available " + inImageStream.available() + " bytes");
+                            if (MAGIC.equals(nextString(inImageStream))) {
+                                final int width = Integer.parseInt(nextString(inImageStream));
+                                final int height = Integer.parseInt(nextString(inImageStream));
+                                final int maxGreyValue = Integer.parseInt(nextString(inImageStream));
+                                System.out.println("read image " + width + " x " + height + " with the maximum gray value " + maxGreyValue + ".");
+
+                                final int recurrentImageBufferSize = width * height;
+                                if (maxGreyValue <= 255) {
+                                    System.out.println("Reading data represented as 1 byte, see http://netpbm.sourceforge.net/doc/pgm.html");
+//                                    readAsTwoDimArray(inImageStream, width, height, maxGreyValue);
+                                    double[] singleDimArray = readAsSingleDimArray(inImageStream, maxGreyValue, recurrentImageBufferSize);
+                                    // TODO: 27.04.19 Label from dataset info corresponds to file name
+                                    labeledPointMiasImage = new LabeledPoint(0, Vectors.dense(singleDimArray));
+                                } else {
+                                    System.out.println("Read data represented as 2 bytes, see http://netpbm.sourceforge.net/doc/pgm.html");
+                                    // TODO: 27.04.19
+                                }
+                                System.out.println("Available " + inImageStream.available() + " bytes");
+                            }
+                        }
                     }
                     return labeledPointMiasImage;
                 })
                 .filter(Objects::nonNull);
-
-        labeledPointJavaRDD.count();
-
     }
 
 

@@ -1,2 +1,2 @@
-# Set of techniques to use hybryd power of Apache Spark on top Hadoop cluster
+# Set of techniques to use hybrid power of Apache Spark on top Hadoop cluster
 

@@ -18,12 +18,13 @@
 package org.apache.spark.examples.ml;
 
 // $example on$
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
+
 import org.apache.spark.ml.classification.MultilayerPerceptronClassificationModel;
 import org.apache.spark.ml.classification.MultilayerPerceptronClassifier;
 import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 // $example off$
 
 /**
@@ -31,46 +32,48 @@ import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator;
  */
 public class JavaMultilayerPerceptronClassifierExample {
 
-  public static void main(String[] args) {
-    SparkSession spark = SparkSession
-      .builder()
-      .appName("JavaMultilayerPerceptronClassifierExample")
-      .getOrCreate();
+    public static void main(String[] args) {
+        SparkSession spark = SparkSession
+                .builder()
+                .appName("JavaMultilayerPerceptronClassifierExample")
+                .master("local[*]")
+                .getOrCreate();
 
-    // $example on$
-    // Load training data
-    String path = "data/mllib/sample_multiclass_classification_data.txt";
-    Dataset<Row> dataFrame = spark.read().format("libsvm").load(path);
+        // $example on$
+        // Load training data
+        String path = "src/main/resources/data/mllib/sample_multiclass_classification_data.txt";
+        Dataset<Row> dataFrame = spark.read().format("libsvm").load(path);
+        dataFrame.show();
 
-    // Split the data into train and test
-    Dataset<Row>[] splits = dataFrame.randomSplit(new double[]{0.6, 0.4}, 1234L);
-    Dataset<Row> train = splits[0];
-    Dataset<Row> test = splits[1];
+        // Split the data into train and test
+        Dataset<Row>[] splits = dataFrame.randomSplit(new double[]{0.6, 0.4}, 1234L);
+        Dataset<Row> train = splits[0];
+        Dataset<Row> test = splits[1];
 
-    // specify layers for the neural network:
-    // input layer of size 4 (features), two intermediate of size 5 and 4
-    // and output of size 3 (classes)
-    int[] layers = new int[] {4, 5, 4, 3};
+        // specify layers for the neural network:
+        // input layer of size 4 (features), two intermediate of size 5 and 4
+        // and output of size 3 (classes)
+        int[] layers = new int[]{4, 5, 4, 3};
 
-    // create the trainer and set its parameters
-    MultilayerPerceptronClassifier trainer = new MultilayerPerceptronClassifier()
-      .setLayers(layers)
-      .setBlockSize(128)
-      .setSeed(1234L)
-      .setMaxIter(100);
+        // create the trainer and set its parameters
+        MultilayerPerceptronClassifier trainer = new MultilayerPerceptronClassifier()
+                .setLayers(layers)
+                .setBlockSize(128)
+                .setSeed(1234L)
+                .setMaxIter(100);
 
-    // train the model
-    MultilayerPerceptronClassificationModel model = trainer.fit(train);
+        // train the model
+        MultilayerPerceptronClassificationModel model = trainer.fit(train);
 
-    // compute accuracy on the test set
-    Dataset<Row> result = model.transform(test);
-    Dataset<Row> predictionAndLabels = result.select("prediction", "label");
-    MulticlassClassificationEvaluator evaluator = new MulticlassClassificationEvaluator()
-      .setMetricName("accuracy");
+        // compute accuracy on the test set
+        Dataset<Row> result = model.transform(test);
+        Dataset<Row> predictionAndLabels = result.select("prediction", "label");
+        MulticlassClassificationEvaluator evaluator = new MulticlassClassificationEvaluator()
+                .setMetricName("accuracy");
 
-    System.out.println("Test set accuracy = " + evaluator.evaluate(predictionAndLabels));
-    // $example off$
+        System.out.println("Test set accuracy = " + evaluator.evaluate(predictionAndLabels));
+        // $example off$
 
-    spark.stop();
-  }
+        spark.stop();
+    }
 }

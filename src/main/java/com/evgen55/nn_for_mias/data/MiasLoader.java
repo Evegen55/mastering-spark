@@ -26,6 +26,11 @@ import java.util.Objects;
 
 import static com.evgen55.nn_for_mias.data.LabelsMaker.getLabelsFromDescription;
 
+/**
+ * Class is responsible to form all necessary data structures to train NN
+ *
+ * @author <a href="mailto:i.dolende@gmail.com">Evgenii Lartcev</a>
+ */
 public class MiasLoader {
 
     private static String PGM_SUFFIX = ".pgm";
@@ -69,14 +74,14 @@ public class MiasLoader {
                     String pathToFile = fileNameAndDataTuple._1();
                     final Path hdfsPathToFile = new Path(pathToFile);
                     final String fileName = hdfsPathToFile.getName();
-                    if (fileName.endsWith(PGM_SUFFIX)) {
+                    if (fileName.endsWith(PGM_SUFFIX)) { // TODO: 03.05.19 there are two projections for each case, it needs to be reverted to train!
                         try (final BufferedInputStream inImageStream = new BufferedInputStream(fileNameAndDataTuple._2().open())) {
                             System.out.println("Available " + inImageStream.available() + " bytes");
                             if (MAGIC.equals(nextString(inImageStream))) {
                                 final int width = Integer.parseInt(nextString(inImageStream));
                                 final int height = Integer.parseInt(nextString(inImageStream));
                                 final int maxGreyValue = Integer.parseInt(nextString(inImageStream));
-                                System.out.println("read image " + fileName + " "+ width + " x " + height + " with the maximum gray value " + maxGreyValue + ".");
+                                System.out.println("read image " + fileName + " " + width + " x " + height + " with the maximum gray value " + maxGreyValue + ".");
 
                                 final int recurrentImageBufferSize = width * height;
                                 if (maxGreyValue <= 255) {

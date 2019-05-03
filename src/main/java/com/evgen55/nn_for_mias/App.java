@@ -11,29 +11,39 @@ import org.apache.spark.sql.SparkSession;
 
 import java.io.IOException;
 
-//-Xmx16G
+import static com.evgen55.nn_for_mias.data.LabelsMaker.BACKGROUND_TISSUE_MAPPING_SIZE;
+
+/**
+ * Entry point to operate with MIAS dataset
+ * <p>
+ * -Xmx16G
+ *
+ * @author <a href="mailto:i.dolende@gmail.com">Evgenii Lartcev</a>
+ */
 public class App {
 
+    private static final String PATH_TO_MIAS_DATASET = "load from http://peipa.essex.ac.uk/info/mias.html to folder on local file system or HDFS";
+
     public static void main(String[] args) throws IOException {
-        SparkConf sparkConf = new SparkConf(true)
+        final SparkConf sparkConf = new SparkConf(true)
                 .set("spark.driver.maxResultSize", "2500M");
-        SparkSession sparkSession = SparkSession.builder()
+
+        final SparkSession sparkSession = SparkSession.builder()
                 .appName("mias")
                 .master("local[*]")
                 .config(sparkConf)
                 .getOrCreate();
 
-        MiasLoader miasLoader = new MiasLoader(sparkSession);
+        final MiasLoader miasLoader = new MiasLoader(sparkSession);
 
-        Dataset<Row> rowDataset = miasLoader
-                .load("/home/evgen/Development/1_Under_VCS/github/4_NN_ML/data_for_trainings/all-mias");
+        final Dataset<Row> rowDataset = miasLoader
+                .load(PATH_TO_MIAS_DATASET);
 
-        Dataset<Row>[] datasets = rowDataset.randomSplit(new double[]{0.6, 0.4}, 1234L);
-        Dataset<Row> train = datasets[0];
-        Dataset<Row> test = datasets[1];
+        final Dataset<Row>[] datasets = rowDataset.randomSplit(new double[]{0.6, 0.4}, 1234L);
+        final Dataset<Row> train = datasets[0];
+        final Dataset<Row> test = datasets[1];
 
-        final int[] layers = new int[]{1024 * 1024, 100, 1}; // TODO: 01.05.19 labels
-//        final int[] layers = new int[]{4, 5, 9, 3, 4};
+        final int[] layers = new int[]{1024 * 1024, 100, BACKGROUND_TISSUE_MAPPING_SIZE};
         final MultilayerPerceptronClassifier trainer = new MultilayerPerceptronClassifier("Evgen55")
                 .setLayers(layers)
                 .setBlockSize(128)

@@ -8,14 +8,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-class LabelsMaker {
+/**
+ * Class which holds labeling info from description to dataset
+ *
+ * @author <a href="mailto:i.dolende@gmail.com">Evgenii Lartcev</a>
+ */
+public class LabelsMaker {
 
-    private static final Map<String, Integer> backgroundTissueMapping = new HashMap<>(3);
-    private static final Map<String, Integer> classOfAbnormalityMapping = new HashMap<>(7);
-    private static final Map<String, Integer> severityOfAbnormalityMapping = new HashMap<>(2);
+    public static final int BACKGROUND_TISSUE_MAPPING_SIZE = 3;
+    private static final Map<String, Integer> backgroundTissueMapping = new HashMap<>(BACKGROUND_TISSUE_MAPPING_SIZE);
+
+    public static final int CLASS_OF_ABNORMALITY_MAPPING_SIZE = 7;
+    private static final Map<String, Integer> classOfAbnormalityMapping = new HashMap<>(CLASS_OF_ABNORMALITY_MAPPING_SIZE);
+
+    public static final int SEVERITY_OF_ABNORMALITY_MAPPING_SIZE = 2;
+    private static final Map<String, Integer> severityOfAbnormalityMapping = new HashMap<>(SEVERITY_OF_ABNORMALITY_MAPPING_SIZE);
 
     static {
-        //0 reserved
         backgroundTissueMapping.put("F", 0);
         backgroundTissueMapping.put("G", 1);
         backgroundTissueMapping.put("D", 2);

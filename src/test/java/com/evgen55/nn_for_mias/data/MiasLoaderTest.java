@@ -37,4 +37,12 @@ public class MiasLoaderTest {
         rowDataset.count();
         Thread.sleep(1000000);
     }
+
+    @Test
+    public void testLoad() throws IOException, InterruptedException {
+        MiasLoader miasLoader = new MiasLoader(sparkSession);
+        String pathToMias = "/home/evgen/Development/1_Under_VCS/github/4_NN_ML/data_for_trainings/3-mias";
+        Dataset<Row> rowDataset = miasLoader.load(pathToMias);
+        rowDataset.show();
+    }
 }

@@ -9,6 +9,9 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://dl.bintray.com/spark-packages/maven/'
+    }
 }
 
 ext {
@@ -39,8 +42,18 @@ dependencies {
     compile group: 'org.apache.spark', name: 'spark-streaming_2.11', version: sparkStreamingVersion
     // https://mvnrepository.com/artifact/com.datastax.spark/spark-cassandra-connector
     compile("com.datastax.spark:spark-cassandra-connector_$scalaVersion:$datastaxVersion")
+
+    // https://mvnrepository.com/artifact/databricks/spark-deep-learning
+    compile group: 'databricks', name: 'spark-deep-learning', version: '1.5.0-spark2.4-s_2.11'
+
     //
     compile("org.projectlombok:lombok:$lombokVersion")
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.evgen55.nn_for_mias.App'
+    }
 }

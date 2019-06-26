@@ -1,5 +1,6 @@
 package com.evgen55.nn_for_mias.data;
 
+import com.evgen55.nn_for_mias.data.etl.MiasLoader;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -21,28 +22,10 @@ public class MiasLoaderTest {
     }
 
     @Test
-    public void getLabeledMiasImage() throws IOException, InterruptedException {
-        MiasLoader miasLoader = new MiasLoader(sparkSession);
-        final String inputImagePath = "src/main/resources/dataset_mias/mdb001.pgm";
-        miasLoader.getLabeledMiasImage(inputImagePath);
-        Thread.sleep(1000000);
-    }
-
-    @Test
-    public void readFromData() throws IOException, InterruptedException {
+    public void testLoad() throws IOException {
         MiasLoader miasLoader = new MiasLoader(sparkSession);
         String pathToMias = "";
-        Dataset<Row> rowDataset = miasLoader.readFromData(pathToMias);
-        rowDataset.show();
-        rowDataset.count();
-        Thread.sleep(1000000);
-    }
-
-    @Test
-    public void testLoad() throws IOException, InterruptedException {
-        MiasLoader miasLoader = new MiasLoader(sparkSession);
-        String pathToMias = "";
-        Dataset<Row> rowDataset = miasLoader.load(pathToMias);
+        Dataset<Row> rowDataset = miasLoader.load(pathToMias, false);
         rowDataset.show();
     }
 }

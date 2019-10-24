@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class PgmUtils {
@@ -181,6 +182,22 @@ public class PgmUtils {
             }
         }
         return image;
+    }
+
+    public static int[] calculateHistogram(final double[] imgArr) {
+        int[] hist = new int[MAX_GREY_VAL];
+        for (double grayScale : imgArr) {
+            hist[(int) grayScale] += 1;
+        }
+        return hist;
+    }
+    public static int[] calculateHistogramStreamApi(final double[] imgArr) {
+        int[] hist = new int[MAX_GREY_VAL];
+
+        Arrays.stream(imgArr)
+                .forEach(grayScale -> hist[(int) grayScale] += 1);
+
+        return hist;
     }
 
 }

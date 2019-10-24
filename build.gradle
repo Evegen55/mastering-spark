@@ -5,7 +5,7 @@ plugins {
 group 'bigdata-examples'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 1.10
 
 repositories {
     mavenCentral()
@@ -44,7 +44,7 @@ dependencies {
     compile("com.datastax.spark:spark-cassandra-connector_$scalaVersion:$datastaxVersion")
 
     // https://mvnrepository.com/artifact/databricks/spark-deep-learning
-    compile group: 'databricks', name: 'spark-deep-learning', version: '1.5.0-spark2.4-s_2.11'
+    compile("databricks:spark-deep-learning:1.5.0-spark2.4-s_$scalaVersion")
 
     //
     compile("org.projectlombok:lombok:$lombokVersion")

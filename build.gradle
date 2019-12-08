@@ -5,7 +5,7 @@ plugins {
 group 'bigdata-examples'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 1.10
+sourceCompatibility = 1.11
 
 repositories {
     mavenCentral()
@@ -15,13 +15,14 @@ repositories {
 }
 
 ext {
-    datastaxVersion = '2.4.1'
-    sparkSqlVersion = '2.4.1'
-    sparkCoreVersion = '2.4.1'
-    sparkMlVersion = '2.4.1'
-    sparkStreamingVersion = '2.4.1'
-    scalaVersion = '2.11'
-    scalaLibraryVersion = scalaVersion + '.12'
+    sparkMajorVersion = '2.4'
+    datastaxVersion = sparkMajorVersion + '.1'
+    sparkSqlVersion = sparkMajorVersion + '.4'
+    sparkCoreVersion = sparkMajorVersion + '.4'
+    sparkMlVersion = sparkMajorVersion + '.4'
+    sparkStreamingVersion = sparkMajorVersion + '.4'
+    scalaVersion = '2.12'
+    scalaLibraryVersion = scalaVersion + '.10'
     lombokVersion = '1.18.2'
 }
 
@@ -33,18 +34,20 @@ dependencies {
     // https://mvnrepository.com/artifact/org.scala-lang/scala-library
     compile group: 'org.scala-lang', name: 'scala-library', version: scalaLibraryVersion
     // https://mvnrepository.com/artifact/org.apache.spark/spark-core
-    compile group: 'org.apache.spark', name: 'spark-core_2.11', version: sparkCoreVersion
+    compile group: 'org.apache.spark', name: 'spark-core_' + scalaVersion, version: sparkCoreVersion
     // https://mvnrepository.com/artifact/org.apache.spark/spark-sql
-    compile group: 'org.apache.spark', name: 'spark-sql_2.11', version: sparkSqlVersion
+    compile group: 'org.apache.spark', name: 'spark-sql_' + scalaVersion, version: sparkSqlVersion
     // https://mvnrepository.com/artifact/org.apache.spark/spark-mllib
-    compile group: 'org.apache.spark', name: 'spark-mllib_2.11', version: sparkMlVersion
+    compile group: 'org.apache.spark', name: 'spark-mllib_' + scalaVersion, version: sparkMlVersion
     // https://mvnrepository.com/artifact/org.apache.spark/spark-streaming
-    compile group: 'org.apache.spark', name: 'spark-streaming_2.11', version: sparkStreamingVersion
+    compile group: 'org.apache.spark', name: 'spark-streaming_' + scalaVersion, version: sparkStreamingVersion
     // https://mvnrepository.com/artifact/com.datastax.spark/spark-cassandra-connector
-    compile("com.datastax.spark:spark-cassandra-connector_$scalaVersion:$datastaxVersion")
+//    compile group: 'com.datastax.spark', name: 'spark-cassandra-connector_' + scalaVersion, version: datastaxVersion
+    compile group: 'com.datastax.spark', name: 'spark-cassandra-connector_2.11', version: datastaxVersion
 
     // https://mvnrepository.com/artifact/databricks/spark-deep-learning
-    compile("databricks:spark-deep-learning:1.5.0-spark2.4-s_$scalaVersion")
+//  compile group: 'databricks', name: 'spark-deep-learning', version: '1.5.0-spark2.4-s_'+scalaVersion
+    compile group: 'databricks', name: 'spark-deep-learning', version: '1.5.0-spark2.4-s_2.11'
 
     //
     compile("org.projectlombok:lombok:$lombokVersion")

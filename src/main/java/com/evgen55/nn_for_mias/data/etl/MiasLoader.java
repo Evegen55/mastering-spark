@@ -1,5 +1,6 @@
 package com.evgen55.nn_for_mias.data.etl;
 
+import com.databricks.sparkdl.ImageUtils$;
 import com.evgen55.nn_for_mias.data.MiasLabel;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -14,8 +15,10 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -28,6 +31,7 @@ import static com.evgen55.nn_for_mias.data.etl.PgmUtils.PGM_SUFFIX;
 import static com.evgen55.nn_for_mias.data.etl.PgmUtils.nextString;
 import static com.evgen55.nn_for_mias.data.etl.PgmUtils.readAsSingleDimArrayFromFile;
 import static com.evgen55.nn_for_mias.data.etl.PgmUtils.readAsSingleDimArrayMirrorFromFile;
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 /**
  * Class is responsible to form all necessary data structures to train NN
@@ -72,6 +76,24 @@ public class MiasLoader {
         return getRowDatasetFromHdfs(pathToMiasDataSet, false);
     }
 
+    /**
+     *
+     * @param hdfsPath
+     * @param mirrorDirect
+     * @return dataset of rows, each of which represents a single-dimension array made of picture, and an appropriate label.
+     *
+     * Label represents a unique class to be able to classify images in simple NN algorithms
+     *
+     * see fields com.evgen55.nn_for_mias.data.MiasLabel for possible meaning of label
+     *
+     * +--------------------+-----+
+     * |            features|label|
+     * +--------------------+-----+
+     * |[0.0,0.0,0.0,0.0,...|  2.0|
+     * |[0.0,0.0,0.0,0.0,...|  1.0|
+     * |[0.0,0.0,0.0,0.0,...|  1.0|
+     * +--------------------+-----+
+     */
     private Dataset<Row> getRowDatasetFromHdfs(final Path hdfsPath, final boolean mirrorDirect) {
         final Map<String, MiasLabel> labelsFromDescription = getLabelsFromDescription(javaSparkContext, hdfsPath);
         JavaRDD<LabeledPoint> labeledPointsJavaRDD = getLabeledPointJavaRDD(hdfsPath, labelsFromDescription, mirrorDirect);
@@ -132,6 +154,17 @@ public class MiasLoader {
                     return labeledPointMiasImage;
                 })
                 .filter(Objects::nonNull);
+    }
+
+    public Dataset<Row> getRowDatasetWithDatabrickAPI() {
+        final Row spImageFromBufferedImage = ImageUtils$.MODULE$.spImageFromBufferedImage(
+                new BufferedImage(IMAGE_WIDTH, IMAGE_HIGH, TYPE_BYTE_GRAY),
+                "/home/evgen/Development/1_Under_VCS/github/4_NN_ML/data_for_trainings/3-mias/mdb001.pgm");
+
+        final JavaSparkContext javaSparkContext = new JavaSparkContext(sparkSession.sparkContext());
+        final JavaRDD<Row> parallelize = javaSparkContext.parallelize(List.of(spImageFromBufferedImage));
+
+        return sparkSession.createDataFrame(parallelize, Row.class);
     }
 
 

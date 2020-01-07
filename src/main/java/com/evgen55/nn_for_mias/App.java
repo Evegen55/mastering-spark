@@ -33,27 +33,30 @@ public class App {
         final SparkConf sparkConf = new SparkConf(true)
                 .set("spark.driver.maxResultSize", "2500M");
 
-
         final SparkSession sparkSession = SparkSession.builder()
                 .appName(MIAS)
                 .master("local[*]")
                 .config(sparkConf)
                 .getOrCreate();
 
+        final MiasLoader miasLoader = new MiasLoader(sparkSession); // main entity to operate with datasets
 
+        //attempt to work with transformed dataset
 //        final MiasTransformer miasTransformer = new MiasTransformer(sparkSession, PATH_TO_MIAS_DATASET);
 //        final Path cleanAndTransformDataset = miasTransformer.cleanAndTransformDataset(false);
-
-        final MiasLoader miasLoader = new MiasLoader(sparkSession);
         //loads extracted dataset
 //        final Dataset<Row> rowDataset = miasLoader
 //                .load(cleanAndTransformDataset);
+
+        //attempt to work with transformed dataset formed with Databricks API
+//        final Dataset<Row> rowDatasetWithDatabrickAPI = miasLoader.getRowDatasetWithDatabrickAPI();
+//        rowDatasetWithDatabrickAPI.show();
+
         //loads raw dataset
         final Dataset<Row> rowDataset = miasLoader
                 .load(PATH_TO_MIAS_DATASET, true);
-
-
 //        rowDataset.show();
+
         final Dataset<Row>[] datasets = rowDataset.randomSplit(new double[]{0.6, 0.4}, 1234L);
         final Dataset<Row> train = datasets[0];
         final Dataset<Row> test = datasets[1];
